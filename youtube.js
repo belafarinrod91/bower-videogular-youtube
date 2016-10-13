@@ -30,8 +30,7 @@ angular.module("info.vietnamcode.nampnq.videogular.plugins.youtube", [])
                             'showinfo': 0,
                             'rel': 0,
                             'autoplay': 0, //Switch autoplay to 1 to autoplay videos
-                            'start': 0,
-                            'iv_load_policy': 1
+                            'start': 0
                         };
 
                         if (optionsArr !== null) {
@@ -98,12 +97,6 @@ angular.module("info.vietnamcode.nampnq.videogular.plugins.youtube", [])
                             API.mediaElement[0].__defineSetter__("volume", function (volume) {
                                 return ytplayer.setVolume(volume * 100.0);
                             });
-                            API.mediaElement[0].__defineGetter__("playbackRate", function () {
-                                return ytplayer.getPlaybackRate();
-                            });
-                            API.mediaElement[0].__defineSetter__("playbackRate", function (rate) {
-                                return ytplayer.setPlaybackRate(rate);
-                            });
                             API.mediaElement[0].play = function () {
                                 ytplayer.playVideo();
                             };
@@ -114,8 +107,11 @@ angular.module("info.vietnamcode.nampnq.videogular.plugins.youtube", [])
                             angular.element(ytplayer.getIframe()).css({'width':'100%','height':'100%'});
 
                             // Trigger canplay event
-                            var event = new CustomEvent("canplay");
-                            API.mediaElement[0].dispatchEvent(event);
+                            /*var event = new Event("canplay");
+                            API.mediaElement[0].dispatchEvent(event);)*/
+
+                            var evt = createCustomEvent("canplay");
+                            API.mediaElement[0].dispatchEvent(evt);
                         }
 
                         function updateTime() {
@@ -148,7 +144,7 @@ angular.module("info.vietnamcode.nampnq.videogular.plugins.youtube", [])
 
                                 case YT.PlayerState.PLAYING:
                                     // Trigger onStartPlaying event
-                                    var event = new CustomEvent("playing");
+                                    var event = createCustomEvent("playing");
                                     API.mediaElement[0].dispatchEvent(event);
                                     API.setState(VG_STATES.PLAY);
                                     startUpdateTimer(600);
@@ -165,7 +161,7 @@ angular.module("info.vietnamcode.nampnq.videogular.plugins.youtube", [])
 
                                 case YT.PlayerState.BUFFERING:
                                     // Trigger onStartBuffering event
-                                    var event = new CustomEvent("waiting");
+                                    var event = createCustomEvent("waiting");
                                     API.mediaElement[0].dispatchEvent(event);
                                 break;
 
@@ -191,6 +187,14 @@ angular.module("info.vietnamcode.nampnq.videogular.plugins.youtube", [])
                                 }
                             }
                         }
+
+                        function createCustomEvent(event, params){
+                            params = params || { bubbles: false, cancelable: false, detail: undefined };
+                            var evt = document.createEvent( 'CustomEvent' );
+                            evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+                            return evt;
+                        }
+
                         scope.$watch(
                             function() {
                                 return API.sources;
